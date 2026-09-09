@@ -25,7 +25,6 @@ set.seed(42)
 # 1. 資料讀取與整理
 # ============================================================
 
-file_path <- "D:/Github/semiconductor-wafer-quality-analysis/new_wafer_data.csv"
 file_path <- file.path(
   "data",
   "new_wafer_data.csv"
