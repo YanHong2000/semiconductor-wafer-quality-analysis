@@ -358,8 +358,8 @@ semiconductor-wafer-quality-analysis/
 ├── data/
 │   └── new_wafer_data.csv
 │
-└── original_report/
-    └── Final Report.pdf
+└── report/
+    └── 半導體晶圓製程變異與品質分析_專案報告.pdf
 ```
 
 > 若資料檔不適合公開，可將 `data/` 加入 `.gitignore`，並在 README 中保留資料欄位與格式說明即可。
@@ -368,7 +368,7 @@ semiconductor-wafer-quality-analysis/
 
 ## How to Run
 
-### 1. Install required packages
+### 1. 安裝所需套件
 
 ```r
 install.packages(c(
@@ -385,7 +385,10 @@ install.packages(c(
 在 `wafer_quality_analysis.R` 中修改：
 
 ```r
-file_path <- "D:/Github/統計品管/new_wafer_data.csv"
+file_path <- file.path(
+  "data",
+  "new_wafer_data.csv"
+)
 ```
 
 為自己的資料路徑。
