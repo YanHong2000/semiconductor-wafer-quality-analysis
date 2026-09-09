@@ -1,16 +1,24 @@
 # Semiconductor Wafer Process Variation and Quality Analysis
 
-半導體晶圓製程變異與品質分析
+## 半導體晶圓製程變異與品質分析
 
-這是一個以 **R** 完成的統計品質管制課程專案，使用 245 片 wafer 的量測資料與 2,740 個二元製程變數，分析製程分布、LOT 間差異、管制圖、高相關製程變數、變數篩選，以及平均與變異數模型。
+本專案以 **R** 進行半導體晶圓製程資料之統計品質管制分析，使用 245 片 wafer 的量測資料與 2,740 個二元製程變數，探討整體製程分布、LOT 間差異、統計管制圖、高相關製程變數、變數篩選，以及平均與變異數模型。
 
-本 repository 將原始課堂程式重新整理成單一可執行的 R script，保留課程中使用並與老師討論過的主要分析方法，同時移除重複、測試性與不必要的程式碼。
+本 repository 為原始統計品質管制課程專案的重新整理版本，將原先分散於 R Markdown、課堂程式與分析紀錄中的內容整合為單一可執行的 R script，保留課程專案所採用的主要分析方法，並移除重複、測試性與不必要的程式碼，以提升可讀性與可重現性。
 
 ---
 
-## Project Overview
+## 專案文件
 
-資料中包含：
+- [完整專案報告](report/半導體晶圓製程變異與品質分析_專案報告.pdf)
+- [R 分析程式](wafer_quality_analysis.R)
+- [資料集](data/new_wafer_data.csv)
+
+---
+
+## 專案概述
+
+資料包含：
 
 - `LOT`：批次編號，共 10 個 LOT
 - `WAFER`：各 LOT 內的 wafer 編號
@@ -19,7 +27,7 @@
 
 資料規模：
 
-| Item | Value |
+| 項目 | 數量 |
 |---|---:|
 | Wafer samples | 245 |
 | LOTs | 10 |
@@ -30,20 +38,20 @@
 
 ---
 
-## Objectives
+## 分析目標
 
-本專案主要回答以下問題：
+本專案主要探討以下問題：
 
-1. `OBSERVATION` 的整體分布與 LOT 間差異如何？
+1. `OBSERVATION` 的整體分布與 LOT 間差異為何？
 2. 製程是否存在明顯的批次間與晶圓間變異？
 3. X-bar、R、S 與 Individuals Chart 顯示哪些製程異常？
 4. 2,740 個高維製程變數中，是否存在高度相關的「孿生變數」？
-5. OGA 與 LASSO 會選出哪些重要製程變數？
-6. 是否可以同時找出影響平均水準與變異程度的製程變數？
+5. OGA 與 LASSO 會篩選出哪些重要製程變數？
+6. 是否可以同時找出影響製程平均水準與變異程度的製程變數？
 
 ---
 
-## Analysis Workflow
+## 分析流程
 
 ```text
 Data Loading & Cleaning
@@ -65,11 +73,11 @@ Two-stage OGA + HDIC + Trim
 
 ---
 
-## Methods
+## 分析方法
 
-### 1. Exploratory Data Analysis
+### 1. 探索性資料分析
 
-分析 `OBSERVATION` 的整體分布，包含：
+針對 `OBSERVATION` 進行整體分布與 LOT 間差異分析，包含：
 
 - Summary statistics
 - Histogram
@@ -79,14 +87,16 @@ Two-stage OGA + HDIC + Trim
 - Wafer sequence visualization
 - Kruskal-Wallis test
 
-Shapiro-Wilk 檢定結果：
+Shapiro-Wilk 常態性檢定結果：
 
 ```text
 W = 0.96979
 p-value = 4.574e-05
 ```
 
-不同 LOT 的分布位置也存在顯著差異：
+結果顯示 `OBSERVATION` 並不完全符合常態分布。
+
+不同 LOT 的分布位置亦存在顯著差異：
 
 ```text
 Kruskal-Wallis chi-squared = 178.92
@@ -96,20 +106,20 @@ p-value < 2.2e-16
 
 ---
 
-### 2. Process Capability
+### 2. 製程能力分析
 
-專案保留課堂中使用的不同規格定義。
+專案保留課堂分析中使用的不同規格定義方式。
 
-#### Assumed engineering limits
+#### 課堂假設規格
 
 ```text
 LSL = 12
 USL = 20
 ```
 
-結果：
+分析結果：
 
-| Metric | Value |
+| 指標 | 數值 |
 |---|---:|
 | Mean | 16.2925 |
 | SD | 1.8345 |
@@ -117,7 +127,7 @@ USL = 20
 | Cpk | 0.6737 |
 | Outside assumed limits | 2.8571% |
 
-#### 1% / 99% quantile proxy
+#### 1% / 99% 分位數規格代理
 
 以資料的 1% 與 99% 分位數作為規格代理：
 
@@ -125,7 +135,7 @@ USL = 20
 Cp ≈ 0.741
 ```
 
-#### Natural limits
+#### Mean ± 3 SD 自然界限
 
 以：
 
@@ -133,19 +143,19 @@ Cp ≈ 0.741
 Mean ± 3 SD
 ```
 
-作為自然界限時，樣本超出比例為：
+作為自然界限時，樣本超出範圍的比例為：
 
 ```text
 0.4082%
 ```
 
-> Quantile limits 與 natural limits 並非正式工程規格，因此相關結果主要作為課堂中的製程能力與資料分布練習。
+> 分位數界限與 Mean ± 3 SD 並非正式工程規格，因此此部分主要作為課堂中製程能力與資料分布分析的實作。
 
 ---
 
-### 3. Statistical Process Control
+### 3. 統計製程管制
 
-建立以下管制圖：
+建立以下 Statistical Process Control（SPC）圖表：
 
 - Individuals Chart
 - X-bar Chart
@@ -162,13 +172,13 @@ LCL = 13.39633
 UCL = 19.18865
 ```
 
-X-bar Chart 顯示多個 LOT 平均值超出共同管制界限，反映明顯的 LOT-to-LOT variation。
+X-bar Chart 顯示多個 LOT 平均值超出共同管制界限，反映資料中存在明顯的 LOT-to-LOT variation。
 
 ---
 
-### 4. Twin-variable Correlation Analysis
+### 4. 孿生製程變數分析
 
-製程變數為大量二元欄位，因此先移除 15 個 constant variables，再計算 Pearson correlation。
+由於資料包含大量二元製程變數，因此先移除 15 個 constant variables，再計算 Pearson correlation。
 
 課堂專案將：
 
@@ -188,13 +198,13 @@ Cluster representatives = 38
 Variables after cluster reduction = 291
 ```
 
-每個 correlation cluster 選擇與 `OBSERVATION` 絕對相關最高的變數作為代表。
+每個 correlation cluster 中，選擇與 `OBSERVATION` 絕對相關程度最高的變數作為該群集代表。
 
 ---
 
-### 5. Orthogonal Greedy Algorithm (OGA)
+### 5. Orthogonal Greedy Algorithm（OGA）
 
-OGA 依序選擇與目前 residual 關聯最大的變數，逐步建立高維變數篩選結果。
+OGA 依序選擇與目前 residual 關聯程度最大的變數，用於高維製程資料的變數篩選。
 
 #### Raw OGA
 
@@ -204,7 +214,7 @@ OGA 依序選擇與目前 residual 關聯最大的變數，逐步建立高維變
 Selected variables = 27
 ```
 
-前幾個變數：
+前幾個被選出的變數：
 
 ```text
 T0404, T1370, T1241, T2395, T1202, T0447, ...
@@ -212,13 +222,13 @@ T0404, T1370, T1241, T2395, T1202, T0447, ...
 
 #### Twin-aware OGA
 
-先進行孿生變數群集整理，再對 291 個代表 / 獨立變數執行 OGA：
+先進行孿生變數群集整理，再對 291 個代表變數與獨立變數執行 OGA：
 
 ```text
 Selected variables = 32
 ```
 
-前幾個變數：
+前幾個被選出的變數：
 
 ```text
 T0404, T0050, T2045, T0450, T0447, T0872, ...
@@ -228,7 +238,7 @@ T0404, T0050, T2045, T0450, T0447, T0872, ...
 
 ### 6. LASSO
 
-使用 `glmnet` 建立 LASSO regression，並使用 10-fold cross-validation 選擇懲罰參數。
+使用 `glmnet` 建立 LASSO regression，並利用 10-fold cross-validation 選擇懲罰參數 λ。
 
 ```r
 set.seed(42)
@@ -241,14 +251,14 @@ cv.glmnet(
 )
 ```
 
-結果：
+分析結果：
 
 | Criterion | Lambda | Selected Variables |
 |---|---:|---:|
 | `lambda.min` | 0.05726786 | 54 |
 | `lambda.1se` | 0.2311913 | 18 |
 
-在兩種 lambda 設定中反覆出現的變數包含：
+在兩種 λ 設定中皆被選取的變數包含：
 
 ```text
 T0404
@@ -266,21 +276,21 @@ T2398
 
 ### 7. Two-stage OGA + HDIC + Trim
 
-最後使用 Two-stage OGA + HDIC + Trim，同時選擇：
+最後使用 Two-stage OGA + HDIC + Trim，同時進行：
 
-- Mean model variables
-- Dispersion model variables
+- Mean model variable selection
+- Dispersion model variable selection
 
 #### Mean model
 
-選出：
+選取變數：
 
 ```text
 T0404
 T1370
 ```
 
-模型：
+模型結果：
 
 ```text
 E(OBSERVATION)
@@ -291,13 +301,13 @@ E(OBSERVATION)
 
 #### Dispersion model
 
-選出：
+選取變數：
 
 ```text
 T0456
 ```
 
-模型：
+模型結果：
 
 ```text
 log(σ²)
@@ -305,13 +315,13 @@ log(σ²)
 + 0.5958349 × T0456
 ```
 
-此模型提供一個同時檢查製程平均水準與變異程度的分析方式。
+此方法提供同時分析製程平均水準與變異程度的方式，可用於辨識可能影響製程中心位置與穩定性的製程變數。
 
 ---
 
-## Key Results
+## 主要結果
 
-| Analysis | Main Result |
+| 分析項目 | 主要結果 |
 |---|---|
 | Shapiro-Wilk | `p = 4.574e-05` |
 | LOT comparison | Kruskal-Wallis `p < 2.2e-16` |
@@ -329,9 +339,9 @@ log(σ²)
 
 ---
 
-## Visualizations
+## 圖表
 
-The R script generates:
+R script 會產生以下主要圖表：
 
 - OBSERVATION histogram
 - Normal Q-Q plot
@@ -345,9 +355,13 @@ The R script generates:
 - LASSO cross-validation curve
 - Two-stage mean / dispersion model plot
 
+完整圖表與分析說明可參考：
+
+[半導體晶圓製程變異與品質分析－專案報告](report/半導體晶圓製程變異與品質分析_專案報告.pdf)
+
 ---
 
-## Repository Structure
+## 專案結構
 
 ```text
 semiconductor-wafer-quality-analysis/
@@ -362,11 +376,9 @@ semiconductor-wafer-quality-analysis/
     └── 半導體晶圓製程變異與品質分析_專案報告.pdf
 ```
 
-> 若資料檔不適合公開，可將 `data/` 加入 `.gitignore`，並在 README 中保留資料欄位與格式說明即可。
-
 ---
 
-## How to Run
+## 執行方式
 
 ### 1. 安裝所需套件
 
@@ -380,9 +392,15 @@ install.packages(c(
 ))
 ```
 
-### 2. Modify the data path
+### 2. 資料路徑
 
-在 `wafer_quality_analysis.R` 中修改：
+資料檔預設位於：
+
+```text
+data/new_wafer_data.csv
+```
+
+R script 使用相對路徑讀取資料：
 
 ```r
 file_path <- file.path(
@@ -391,9 +409,9 @@ file_path <- file.path(
 )
 ```
 
-為自己的資料路徑。
+因此執行程式時，working directory 應位於 repository 根目錄。
 
-### 3. Run the analysis
+### 3. 執行分析
 
 在 RStudio 中開啟：
 
@@ -401,11 +419,11 @@ file_path <- file.path(
 wafer_quality_analysis.R
 ```
 
-依序執行即可重現主要分析結果與圖表。
+由專案根目錄依序執行程式，即可重現主要分析結果與圖表。
 
 ---
 
-## Tools
+## 使用工具
 
 - R
 - RStudio
@@ -417,27 +435,19 @@ wafer_quality_analysis.R
 
 ---
 
-## Project Context
+## 專案背景與性質
 
 本專案原為統計品質管制課程之團隊專案，主要針對半導體晶圓製程資料進行統計分析與品質管制方法實作。
 
-本 repository 為原始課堂專案的整理版本，將原先分散於 R Markdown、課堂程式與分析紀錄中的內容重新整合為單一 R script，包含資料前處理、探索性資料分析、製程能力分析、管制圖、OGA、LASSO，以及 Two-stage OGA + HDIC + Trim 等方法。
+原始分析為團隊合作成果。
 
-整理後的版本主要著重於提升程式碼的可讀性、分析流程的一致性與結果的可重現性，方便後續閱讀、維護與作品集展示。
-
-本專案原始分析為團隊合作成果，本 repository 則為後續重新整理與整合後的版本。
+本 repository 為後續重新整理與整合後的版本，將原先分散於 R Markdown、課堂程式與分析紀錄中的內容重新整合為單一 R script，並重新整理專案文件與分析報告，以提升程式碼可讀性、分析流程一致性與結果可重現性。
 
 ---
 
-## Limitations
+## 分析限制
 
-- `T0001`–`T2740` 為匿名二元製程變數，缺乏實際設備 / 製程 metadata，因此結果主要解讀為統計關聯。
+- `T0001`–`T2740` 為匿名二元製程變數，缺乏實際設備與製程 metadata，因此結果主要解讀為統計關聯。
 - 部分製程能力分析使用假設規格或資料分位數作為 proxy，並非正式工程 specification。
-- 高相關變數代表的是統計上的相似行為，不應直接視為實際相同設備。
-- 本專案的重點為統計品質管制課程方法的實作與比較，而非建立正式量產製程監控系統。
-
----
-
-## Author
-
-**Lin Yan Hong / 林彥宏**
+- 高相關變數代表統計上的相似行為，不應直接視為實際相同設備或製程步驟。
+- 本專案重點為統計品質管制方法的實作與比較，而非建立正式量產製程監控系統。
